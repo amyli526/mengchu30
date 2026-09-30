@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>兔兔的30天中文探险</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- 舞台：固定 4:3（iPad 横屏比例），JS 等比缩放铺满屏幕 -->
+<div id="viewport">
+<div id="stage">
+
+  <!-- ================= 首页 · 30天地图 ================= -->
+  <section id="screen-home" class="screen">
+    <div class="home-left">
+      <div class="hero">
+        <div class="mascot">🐰</div>
+        <h1>兔兔的30天<br>中文探险</h1>
+        <p>每天一个中国经典小典故<br>听 · 说 · 读 · 写 · 玩</p>
+        <div class="progressbar"><div id="home-progress" style="width:0%"></div></div>
+        <span class="sticky" id="home-count">已完成 0 / 30 天</span>
+        <button class="cta" onclick="document.querySelector('#home-map .dayitem.today').click()">▶ 继续今天的学习</button>
+        <div class="hero-tools">
+          <button class="ghost sm" onclick="speak('兔兔欢迎你，今天想学哪一天呢？')">🔊 听一听</button>
+          <button class="ghost sm" onclick="resetAll()">🗑️ 重置进度</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="home-right">
+      <div class="map-head">
+        <h2>🗺️ 30 天探险地图</h2>
+        <span class="map-hint">完成当天 5 个环节解锁下一天</span>
+      </div>
+      <div class="map" id="home-map"></div>
+      <div class="mapnote">第 1–28 天是故事，第 29 天复盘讲故事，第 30 天毕业展示 🎓</div>
+    </div>
+  </section>
+
+  <!-- ================= 学习日 ================= -->
+  <section id="screen-day" class="screen hidden">
+    <div class="topbar">
+      <button class="back" onclick="goHome()">🏠 地图</button>
+      <div class="title" id="day-title">第1天</div>
+      <div class="top-right">
+        <button class="ghost sm" onclick="speak('今天的故事开始啦')">🔊</button>
+        <button class="ghost sm" onclick="resetAll()">🗑️</button>
+      </div>
+    </div>
+
+    <div class="day-body">
+      <!-- 左：学习内容 -->
+      <div class="day-main">
+        <div class="panel two-col" id="panel-listen">
+          <div class="col">
+            <div class="listenbox">
+              <div class="story-text" id="listen-story"></div>
+              <button class="big-btn" onclick="speakStory()">🔊 读给兔兔听</button>
+            </div>
+            <div class="card">
+              <div class="section-label">🔁 跟一跟童谣</div>
+              <div id="listen-rhyme"></div>
+            </div>
+          </div>
+          <div class="col">
+            <div class="moralbox">✨ 小道理：<span id="listen-moral"></span></div>
+            <div class="craftbox">
+              <h3>🧸 蒙特梭利·生活小实验</h3>
+              <p id="listen-craft"></p>
+            </div>
+            <details class="parent"><summary>👩‍👧 家长锦囊</summary><p id="listen-parent"></p></details>
+            <button class="big-btn cta" onclick="doneListen()">✅ 我听完了，去下一关</button>
+          </div>
+        </div>
+
+        <div class="panel two-col" id="panel-speak">
+          <div class="col">
+            <div class="card">
+              <div class="section-label">🗣️ 大声说：复述小句子</div>
+              <p class="sub-note">先听兔兔读，再用小话筒录下自己的声音，听听自己棒不棒！</p>
+              <div id="speak-list"></div>
+            </div>
+          </div>
+          <div class="col">
+            <details class="parent"><summary>👨‍👩‍👧 家长锦囊</summary>
+              <p>几句话只练 1-2 句即可，重在"敢开口"。孩子说完给个大拥抱，别急着纠音。录音回放能帮孩子自己听出进步哦。</p>
+            </details>
+            <div class="craftbox">
+              <h3>💡 录音小技巧</h3>
+              <p>点「🎤 录下来」说完整句，再点「⏹ 保存」。想重录就再点一次「🎤 重录」。录完点「🐰 再听听」，和兔兔读的声音比一比！</p>
+            </div>
+            <button class="big-btn cta" onclick="doneSpeak()">✅ 我说完啦！</button>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-read">
+          <div class="card">
+            <div class="section-label">🌱 蒙氏三段式识字（图片＋文字）</div>
+            <p class="thr-hint" id="three-hint"></p>
+            <div id="three-body" class="three-body"></div>
+            <div class="three-ctl" id="three-ctl"></div>
+          </div>
+          <details class="parent"><summary>👩‍🏫 蒙特梭利·三段式教学（家长锦囊）</summary>
+            <p><b>第1段·命名</b>：指着卡片慢慢说"这是 水"。<br>
+            <b>第2段·辨别</b>：问宝宝"水在哪里？请指给我看"。<br>
+            <b>第3段·回忆</b>：指着图片问"这是什么？"。像温习功课一样，每天反复几次，孩子自己就会啦。</p>
+          </details>
+          <button class="big-btn cta ghost-cta" onclick="doneRead()">✅ 我读完啦（也可以直接点完成）</button>
+        </div>
+
+        <div class="panel" id="panel-write">
+          <div class="trace-wrap">
+            <div class="section-label">🖐️ 蒙氏砂纸字 · 描红写字板</div>
+            <div class="trace-tabs" id="trace-tabs"></div>
+            <div class="canvas-holder"><canvas id="trace-canvas" width="520" height="520"></canvas></div>
+            <div class="seqtip" id="trace-seq"></div>
+            <div class="hint">先用指尖顺着淡淡的字摸一遍（就像摸蒙氏砂纸字），再描红。</div>
+            <div class="row-center">
+              <button class="ghost" onclick="clearTrace()">🧽 重来</button>
+              <button onclick="finishTrace()">✅ 我写完啦</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" id="panel-play">
+          <div class="card">
+            <div class="section-label">🧩 配对游戏：找到好朋友</div>
+            <p class="sub-note">先点上面的图，再点下面一样意思的字（反过来也可以）。</p>
+            <div class="play-rows">
+              <div class="pair-grid" id="match-emoji"></div>
+              <div class="pair-grid" id="match-char"></div>
+            </div>
+          </div>
+          <div class="qz" id="quiz-box">
+            <div class="section-label">❓ 小小过关：你听懂了吗</div>
+            <div id="quiz-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右：当日信息 + 五关导航 -->
+      <aside class="day-side">
+        <div class="dayhero">
+          <span class="chip" id="day-chip">第 1 天</span>
+          <h1><span id="day-emoji">🐦</span><span id="day-name">乌鸦喝水</span></h1>
+          <p id="day-sub">动脑筋，办法总比困难多</p>
+          <div class="side-progress"><div id="side-progress-bar" style="width:0%"></div></div>
+          <div class="side-progress-txt" id="side-progress-txt">已完成 0 / 5</div>
+        </div>
+
+        <div class="tabs" id="day-tabs">
+          <div class="tab" data-p="listen" onclick="showPanel('listen')"><b>👂</b><span>听一听</span><i class="tick">✓</i></div>
+          <div class="tab" data-p="speak"  onclick="showPanel('speak')"><b>🗣️</b><span>说一说</span><i class="tick">✓</i></div>
+          <div class="tab" data-p="read"   onclick="showPanel('read')"><b>📖</b><span>读一读</span><i class="tick">✓</i></div>
+          <div class="tab" data-p="write"  onclick="showPanel('write')"><b>✍️</b><span>写一写</span><i class="tick">✓</i></div>
+          <div class="tab" data-p="play"   onclick="showPanel('play')"><b>🎮</b><span>玩一玩</span><i class="tick">✓</i></div>
+        </div>
+
+        <div class="side-words">
+          <div class="side-label">今天要认识的字</div>
+          <div class="word-chips" id="side-words"></div>
+        </div>
+
+        <details class="parent side-craft"><summary>🎨 今天还可在家做</summary><p id="day-craft"></p></details>
+
+        <button class="ghost sm nextday" id="next-day-btn" onclick="openNextDay()">⏭️ 开启下一天</button>
+      </aside>
+    </div>
+  </section>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
